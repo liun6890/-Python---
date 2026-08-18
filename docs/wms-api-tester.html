@@ -1,0 +1,2840 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WMS API 测试工作台</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --line: #d9dee7;
+      --line-soft: #edf0f5;
+      --text: #1f2937;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #059669;
+      --warning: #b45309;
+      --danger: #dc2626;
+      --purple: #6d28d9;
+      --teal: #0f766e;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.06);
+      --sidebar: #111827;
+      --sidebar-panel: #182235;
+      --focus: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      color: var(--text);
+      background: #eef2f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 312px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      border-right: 1px solid var(--line);
+      background: var(--sidebar);
+      color: #e5e7eb;
+    }
+
+    .brand {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+    }
+
+    .brand p {
+      margin: 0;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .collection-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 12px 14px 0;
+    }
+
+    .summary-item {
+      min-width: 0;
+      padding: 9px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: var(--sidebar-panel);
+    }
+
+    .summary-value {
+      color: #f8fafc;
+      font-size: 17px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .summary-label {
+      margin-top: 5px;
+      color: #94a3b8;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .env-card {
+      margin: 14px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: var(--focus);
+    }
+
+    .input,
+    .select {
+      height: 34px;
+      padding: 0 10px;
+    }
+
+    .textarea {
+      min-height: 120px;
+      padding: 10px;
+      resize: vertical;
+      font-family: Consolas, Monaco, monospace;
+      line-height: 1.55;
+    }
+
+    .dark-input {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(15, 23, 42, 0.68);
+      color: #f8fafc;
+    }
+
+    .token-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .env-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      white-space: nowrap;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn:hover {
+      border-color: #b6c2d2;
+      background: #f8fafc;
+    }
+
+    .btn-primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      border-color: var(--primary-dark);
+      background: var(--primary-dark);
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .btn-danger {
+      border-color: #fecaca;
+      color: var(--danger);
+    }
+
+    .btn-muted {
+      border-color: #dbe3ef;
+      color: #475569;
+      background: #f8fafc;
+    }
+
+    .btn-small {
+      height: 28px;
+      padding: 0 9px;
+      font-size: 12px;
+    }
+
+    .nav-tools {
+      display: flex;
+      gap: 8px;
+      padding: 0 14px 12px;
+    }
+
+    .nav-tools .btn {
+      flex: 1;
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e5e7eb;
+    }
+
+    .endpoint-search {
+      margin: 0 14px 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: var(--sidebar-panel);
+    }
+
+    .search-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .search-title .btn {
+      height: 24px;
+      padding: 0 8px;
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      box-shadow: none;
+      font-size: 12px;
+    }
+
+    .method-filters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .method-filter {
+      height: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.5);
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .method-filter.active {
+      border-color: #60a5fa;
+      background: rgba(37, 99, 235, 0.26);
+      color: #eff6ff;
+    }
+
+    .sidebar-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 16px 8px;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .modules {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 8px 14px;
+    }
+
+    .sidebar-empty {
+      margin: 10px 6px;
+      padding: 14px 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      color: #94a3b8;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .module-block {
+      margin-bottom: 8px;
+    }
+
+    .module-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 8px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .count-badge {
+      min-width: 22px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .endpoint-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 4px;
+      padding: 8px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: #dbeafe;
+      text-align: left;
+    }
+
+    .endpoint-link:hover,
+    .endpoint-link.active {
+      border-color: rgba(96, 165, 250, 0.32);
+      background: rgba(96, 165, 250, 0.14);
+    }
+
+    .endpoint-link.active {
+      box-shadow: inset 3px 0 0 #60a5fa;
+    }
+
+    .endpoint-link .path {
+      color: #94a3b8;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .method-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 22px;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .method-get { background: var(--teal); }
+    .method-post { background: var(--primary); }
+    .method-put,
+    .method-patch { background: var(--warning); }
+    .method-delete { background: var(--danger); }
+    .method-mixed { background: var(--purple); }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-width: 0;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .topbar-left {
+      min-width: 0;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .topbar-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .topbar-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      height: 24px;
+      padding: 0 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      max-width: 100%;
+    }
+
+    .meta-chip.path-chip {
+      max-width: min(620px, 52vw);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: Consolas, Monaco, monospace;
+      font-weight: 700;
+    }
+
+    .meta-chip.auth-needed {
+      border-color: #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    .meta-chip.auth-open {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .method-chip {
+      min-width: 54px;
+      justify-content: center;
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(620px, 1fr) minmax(380px, 440px);
+      gap: 14px;
+      min-height: 0;
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+    }
+
+    .panel-header h2,
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .request-line {
+      display: grid;
+      grid-template-columns: 130px minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8fafc;
+    }
+
+    .request-line .select,
+    .request-line .input {
+      height: 38px;
+    }
+
+    .request-line .btn {
+      height: 38px;
+      min-width: 92px;
+    }
+
+    .request-preview {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .request-preview code {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #334155;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 10px 14px 0;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .tab {
+      height: 34px;
+      padding: 0 12px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      margin-left: 6px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 14px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .param-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .param-table th,
+    .param-table td {
+      border-bottom: 1px solid var(--line-soft);
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .param-table th {
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .param-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .param-table .input,
+    .param-table .select {
+      height: 30px;
+    }
+
+    .table-action-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-start;
+      padding-top: 10px;
+    }
+
+    .body-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .doc-section {
+      display: grid;
+      gap: 12px;
+    }
+
+    .doc-section p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .status-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .status-chip {
+      padding: 5px 8px;
+      border: 1px solid #bfdbfe;
+      border-radius: 5px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .code-box {
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      border-radius: 8px;
+      background: #111827;
+      color: #e5e7eb;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre;
+      min-height: 150px;
+    }
+
+    .right-stack {
+      display: grid;
+      grid-template-rows: auto minmax(230px, 0.72fr) minmax(340px, 1fr) auto;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .assertion-list {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+    }
+
+    .assertion-head,
+    .assertion-row {
+      display: grid;
+      grid-template-columns: 34px 86px minmax(120px, 1fr) 116px minmax(90px, 1fr) 30px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .assertion-head {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0 2px 2px;
+    }
+
+    .assertion-row {
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .empty-state {
+      padding: 16px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .assertion-result-list {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .assertion-result {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      padding: 7px 9px;
+      border-radius: 7px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    .assertion-result.ok {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .assertion-result.fail {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .assertion-result strong,
+    .history-item strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .response-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .metric {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .metric.ok {
+      background: #ecfdf5;
+      color: var(--success);
+    }
+
+    .metric.fail {
+      background: #fef2f2;
+      color: var(--danger);
+    }
+
+    .response-body {
+      padding: 14px;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .history-item:hover {
+      border-color: #bfdbfe;
+      background: #f8fbff;
+    }
+
+    .history-meta {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .script-panel .code-box {
+      max-height: 300px;
+    }
+
+    .response-panel .code-box {
+      min-height: 320px;
+      max-height: 54vh;
+    }
+
+    .script-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      display: none;
+      max-width: 380px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #111827;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    @media (max-width: 1180px) {
+      .app-shell {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .main-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .right-stack {
+        grid-template-rows: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .modules {
+        max-height: 360px;
+      }
+
+      .request-line {
+        grid-template-columns: 1fr;
+      }
+
+      .request-preview {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .topbar-actions {
+        justify-content: flex-start;
+      }
+
+      .assertion-row {
+        grid-template-columns: 30px 1fr;
+      }
+
+      .assertion-head {
+        display: none;
+      }
+
+      .assertion-row > * {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-title">
+          <span class="brand-mark">A</span>
+          <span>WMS API 测试工作台</span>
+        </div>
+        <p>独立纯前端页面，供测试人员维护接口、调试请求、编写断言并生成自动化脚本。</p>
+      </div>
+
+      <div class="collection-summary" aria-label="接口集合统计">
+        <div class="summary-item">
+          <div id="summaryApiCount" class="summary-value">0</div>
+          <div class="summary-label">接口</div>
+        </div>
+        <div class="summary-item">
+          <div id="summaryModuleCount" class="summary-value">0</div>
+          <div class="summary-label">模块</div>
+        </div>
+        <div class="summary-item">
+          <div id="summaryAuthCount" class="summary-value">0</div>
+          <div class="summary-label">鉴权</div>
+        </div>
+      </div>
+
+      <div class="env-card">
+        <label class="field-label" for="baseUrl">环境地址</label>
+        <input id="baseUrl" class="input dark-input" value="http://127.0.0.1:8000">
+        <div class="token-row">
+          <div>
+            <label class="field-label" for="tokenInput">Bearer Token</label>
+            <input id="tokenInput" class="input dark-input" placeholder="登录后自动填充，也可手动粘贴">
+          </div>
+          <button id="loginBtn" class="btn btn-primary" type="button">登录</button>
+        </div>
+        <div class="env-actions">
+          <button id="clearTokenBtn" class="btn btn-small" type="button">清空 Token</button>
+          <button id="resetBaseUrlBtn" class="btn btn-small" type="button">本地环境</button>
+        </div>
+      </div>
+
+      <div class="nav-tools">
+        <button id="exportBtn" class="btn" type="button">导出集合</button>
+        <button id="importBtn" class="btn" type="button">导入集合</button>
+        <input id="importFile" class="hidden-file" type="file" accept=".json,application/json">
+      </div>
+
+      <div class="endpoint-search">
+        <div class="search-title">
+          <span>接口搜索</span>
+          <button id="clearSearchBtn" class="btn" type="button">清空</button>
+        </div>
+        <input id="searchInput" class="input dark-input" placeholder="输入接口名、路径、模块、POST">
+        <div id="methodFilters" class="method-filters" aria-label="按请求方法筛选">
+          <button class="method-filter active" data-method="ALL" type="button">全部</button>
+          <button class="method-filter" data-method="GET" type="button">GET</button>
+          <button class="method-filter" data-method="POST" type="button">POST</button>
+          <button class="method-filter" data-method="PUT" type="button">PUT</button>
+          <button class="method-filter" data-method="PATCH" type="button">PATCH</button>
+          <button class="method-filter" data-method="DELETE" type="button">DELETE</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">
+        <span>接口集合</span>
+        <span id="visibleApiCount">0</span>
+      </div>
+      <nav id="moduleList" class="modules"></nav>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="endpointTitle">接口名称</h1>
+          <div id="endpointSubtitle" class="topbar-subtitle">选择左侧接口开始调试</div>
+          <div class="topbar-metadata">
+            <span id="topMethodChip" class="meta-chip method-chip method-get">GET</span>
+            <span id="topAuthChip" class="meta-chip">Auth -</span>
+            <span id="topPathChip" class="meta-chip path-chip">/</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button id="saveEndpointBtn" class="btn" type="button">保存当前配置</button>
+          <button id="cloneEndpointBtn" class="btn" type="button">复制为用例</button>
+          <button id="copyCurlBtn" class="btn" type="button">复制 cURL</button>
+          <button id="sendBtn" class="btn btn-primary" type="button">发送请求</button>
+        </div>
+      </header>
+
+      <div class="main-grid">
+        <section class="panel">
+          <div class="request-line">
+            <select id="methodSelect" class="select"></select>
+            <input id="pathInput" class="input" placeholder="/api/products">
+            <button id="sendBtnInline" class="btn btn-primary" type="button">发送</button>
+          </div>
+          <div class="request-preview">
+            <strong>请求地址</strong>
+            <code id="requestPreview">http://127.0.0.1:8000/</code>
+          </div>
+
+          <div class="tabs" data-tab-group="request">
+            <button class="tab active" data-tab="params" type="button">Params <span id="paramsCountBadge" class="tab-badge">0</span></button>
+            <button class="tab" data-tab="headers" type="button">Headers <span id="headersCountBadge" class="tab-badge">0</span></button>
+            <button class="tab" data-tab="body" type="button">Body</button>
+            <button class="tab" data-tab="docs" type="button">文档</button>
+          </div>
+
+          <div id="tab-params" class="tab-content active">
+            <div class="table-wrap">
+              <table class="param-table">
+                <thead>
+                <tr>
+                  <th style="width:44px;">启用</th>
+                  <th>参数名</th>
+                  <th>值</th>
+                  <th style="width:90px;">类型</th>
+                  <th>说明</th>
+                  <th style="width:44px;"></th>
+                </tr>
+              </thead>
+                <tbody id="paramsBody"></tbody>
+              </table>
+            </div>
+            <div class="table-action-bar">
+              <button id="addParamBtn" class="btn btn-small" type="button">新增参数</button>
+            </div>
+          </div>
+
+          <div id="tab-headers" class="tab-content">
+            <div class="table-wrap">
+              <table class="param-table">
+                <thead>
+                <tr>
+                  <th style="width:44px;">启用</th>
+                  <th>Header</th>
+                  <th>值</th>
+                  <th>说明</th>
+                  <th style="width:44px;"></th>
+                </tr>
+              </thead>
+                <tbody id="headersBody"></tbody>
+              </table>
+            </div>
+            <div class="table-action-bar">
+              <button id="addHeaderBtn" class="btn btn-small" type="button">新增 Header</button>
+            </div>
+          </div>
+
+          <div id="tab-body" class="tab-content">
+            <div class="body-toolbar">
+              <button id="formatBodyBtn" class="btn btn-small" type="button">格式化 JSON</button>
+              <button id="copyBodyBtn" class="btn btn-small" type="button">复制 Body</button>
+              <button id="clearBodyBtn" class="btn btn-small btn-muted" type="button">清空</button>
+            </div>
+            <textarea id="bodyInput" class="textarea" spellcheck="false" placeholder="JSON 请求体"></textarea>
+          </div>
+
+          <div id="tab-docs" class="tab-content">
+            <div class="doc-section">
+              <p id="docDescription"></p>
+              <div>
+                <div class="panel-title">业务规则</div>
+                <ul id="notesList"></ul>
+              </div>
+              <div>
+                <div class="panel-title">状态流转</div>
+                <div id="statusFlow" class="status-flow"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="right-stack">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>断言</h2>
+              <button id="addAssertionBtn" class="btn btn-small" type="button">新增断言</button>
+            </div>
+            <div id="assertionList" class="assertion-list"></div>
+          </section>
+
+          <section class="panel script-panel">
+            <div class="panel-header">
+              <h2>自动化脚本</h2>
+              <div class="script-actions">
+                <button id="generatePytestBtn" class="btn btn-small" type="button">生成 pytest</button>
+                <button id="copyScriptBtn" class="btn btn-small" type="button">复制脚本</button>
+              </div>
+            </div>
+            <div class="response-body">
+              <pre id="scriptOutput" class="code-box">选择接口后可生成 pytest + requests 自动化脚本。</pre>
+            </div>
+          </section>
+
+          <section class="panel response-panel">
+            <div class="panel-header">
+              <h2>响应</h2>
+              <div class="script-actions">
+                <button id="addResponseAssertBtn" class="btn btn-small" type="button">生成断言</button>
+                <button id="copyResponseBtn" class="btn btn-small" type="button">复制响应</button>
+              </div>
+            </div>
+            <div class="response-meta">
+              <span id="statusMetric" class="metric">Status -</span>
+              <span id="timeMetric" class="metric">Time -</span>
+              <span id="sizeMetric" class="metric">Size -</span>
+              <span id="assertMetric" class="metric">Assertions -</span>
+            </div>
+            <div class="response-body">
+              <div id="assertionResults" class="assertion-result-list"></div>
+              <pre id="responseOutput" class="code-box">尚未发送请求。</pre>
+            </div>
+          </section>
+
+          <section class="panel history-panel">
+            <div class="panel-header">
+              <h2>最近请求</h2>
+              <button id="clearHistoryBtn" class="btn btn-small" type="button">清空</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const METHOD_OPTIONS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+    const defaultCollection = [
+      {
+        id: 'auth-login',
+        module: '认证',
+        name: '登录',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/auth/login',
+        auth: false,
+        description: '使用账号密码登录，返回 JWT 访问令牌和当前用户资料。',
+        params: [],
+        headers: [{ enabled: true, key: 'Content-Type', value: 'application/json', desc: '请求体格式' }],
+        body: '{\n  "username": "root",\n  "password": "123456"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.token', operator: 'exists', expected: '' }
+        ],
+        notes: ['登录成功后自动提取 data.token 并写入全局 Bearer Token。'],
+        statusFlow: []
+      },
+      {
+        id: 'auth-logout',
+        module: '认证',
+        name: '登出',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/auth/logout',
+        auth: true,
+        description: 'JWT 无状态登出接口，后端返回成功，前端或测试脚本负责清理本地 Token。',
+        params: [],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['该接口不会让服务端 Token 失效，只用于统一登出流程。'],
+        statusFlow: []
+      },
+      {
+        id: 'auth-profile',
+        module: '认证',
+        name: '获取当前用户',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/auth/profile',
+        auth: true,
+        description: '根据 Bearer Token 获取当前登录用户资料。',
+        params: [],
+        headers: [],
+        body: '',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.username', operator: 'exists', expected: '' }
+        ],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'dashboard-stats',
+        module: '工作台',
+        name: '工作台统计',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/dashboard/stats',
+        auth: true,
+        description: '返回今日入库、今日出库、SKU 数量、近 7 天趋势和待处理任务。',
+        params: [],
+        headers: [],
+        body: '',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.trend_7d', operator: 'isArray', expected: '' }
+        ],
+        notes: ['统计口径为商品数量，不是单据数量。'],
+        statusFlow: []
+      },
+      {
+        id: 'dashboard-pie',
+        module: '工作台',
+        name: '库存分布图',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/dashboard/inventory-pie',
+        auth: true,
+        description: '按商品或仓库聚合库存分布，用于工作台饼图。',
+        params: [
+          { enabled: false, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码' },
+          { enabled: false, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: '商品 SKU' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data', operator: 'isArray', expected: '' }],
+        notes: ['传 product_sku 时返回该 SKU 在各仓库的库存分布。'],
+        statusFlow: []
+      },
+      {
+        id: 'products',
+        module: '基础资料',
+        name: '商品管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/products',
+        auth: true,
+        description: '商品主数据增删改查，支持 SKU 和商品名称关键词查询。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '10', type: 'number', desc: '每页条数' },
+          { enabled: false, key: 'keyword', value: 'ELEC', type: 'string', desc: '按 sku_code、spu_name 模糊查询' }
+        ],
+        headers: [],
+        body: '{\n  "sku_code": "ELEC-TEST-001",\n  "spu_name": "测试商品",\n  "category": "测试分类",\n  "unit": "个",\n  "safety_stock": 10,\n  "barcode": "6900000000999",\n  "is_active": true\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }
+        ],
+        notes: ['POST 新增、PUT/PATCH 更新、DELETE 删除均使用同一路径。', 'DELETE 请求体格式为 { "id": 1 }。'],
+        statusFlow: []
+      },
+      {
+        id: 'product-create',
+        module: '基础资料',
+        name: '新增商品',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/products',
+        auth: true,
+        description: '新增商品主数据，侧栏独立展示的 POST 创建用例。',
+        params: [],
+        headers: [],
+        body: '{\n  "sku_code": "ELEC-POST-001",\n  "spu_name": "POST 测试商品",\n  "category": "测试分类",\n  "unit": "个",\n  "safety_stock": 10,\n  "barcode": "6900000001001",\n  "is_active": true\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.sku_code', operator: 'equals', expected: 'ELEC-POST-001' }
+        ],
+        notes: ['sku_code、barcode 应避免与已有数据重复。'],
+        statusFlow: []
+      },
+      {
+        id: 'warehouses',
+        module: '基础资料',
+        name: '仓库管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/warehouses',
+        auth: true,
+        description: '仓库主数据增删改查，支持按仓库名称和编码查询。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '20', type: 'number', desc: '每页条数' },
+          { enabled: false, key: 'keyword', value: 'WH', type: 'string', desc: '按 name、code 模糊查询' }
+        ],
+        headers: [],
+        body: '{\n  "name": "测试仓库",\n  "code": "WH-TEST-01",\n  "address": "测试地址",\n  "contact": "测试员",\n  "phone": "13800138000",\n  "is_active": true\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['仓库 code 唯一。'],
+        statusFlow: []
+      },
+      {
+        id: 'warehouse-create',
+        module: '基础资料',
+        name: '新增仓库',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/warehouses',
+        auth: true,
+        description: '新增仓库主数据，侧栏独立展示的 POST 创建用例。',
+        params: [],
+        headers: [],
+        body: '{\n  "name": "POST 测试仓库",\n  "code": "WH-POST-01",\n  "address": "测试地址",\n  "contact": "测试员",\n  "phone": "13800138000",\n  "is_active": true\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.code', operator: 'equals', expected: 'WH-POST-01' }
+        ],
+        notes: ['仓库 code 唯一，重复提交会触发后端校验或数据库约束。'],
+        statusFlow: []
+      },
+      {
+        id: 'suppliers',
+        module: '基础资料',
+        name: '供应商管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/suppliers',
+        auth: true,
+        description: '供应商主数据增删改查，支持按名称、联系人和电话查询。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '20', type: 'number', desc: '每页条数' }
+        ],
+        headers: [],
+        body: '{\n  "name": "测试供应商",\n  "contact": "供应商联系人",\n  "phone": "021-12345678",\n  "rating": 5,\n  "is_active": true\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'supplier-create',
+        module: '基础资料',
+        name: '新增供应商',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/suppliers',
+        auth: true,
+        description: '新增供应商主数据，侧栏独立展示的 POST 创建用例。',
+        params: [],
+        headers: [],
+        body: '{\n  "name": "POST 测试供应商",\n  "contact": "供应商联系人",\n  "phone": "021-12345678",\n  "rating": 5,\n  "is_active": true\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.name', operator: 'equals', expected: 'POST 测试供应商' }
+        ],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'customers',
+        module: '基础资料',
+        name: '客户管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/customers',
+        auth: true,
+        description: '客户主数据增删改查，支持按名称、联系人和电话查询。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '20', type: 'number', desc: '每页条数' }
+        ],
+        headers: [],
+        body: '{\n  "name": "测试客户",\n  "contact": "客户联系人",\n  "phone": "13600002222",\n  "address": "测试地址",\n  "credit_limit": 100000\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'customer-create',
+        module: '基础资料',
+        name: '新增客户',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/customers',
+        auth: true,
+        description: '新增客户主数据，侧栏独立展示的 POST 创建用例。',
+        params: [],
+        headers: [],
+        body: '{\n  "name": "POST 测试客户",\n  "contact": "客户联系人",\n  "phone": "13600002222",\n  "address": "测试地址",\n  "credit_limit": 100000\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.name', operator: 'equals', expected: 'POST 测试客户' }
+        ],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'inbound-orders',
+        module: '入库',
+        name: '入库单管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '入库单创建、查询、编辑、删除，以及提交、审核、驳回、收货、上架等流程动作。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '10', type: 'number', desc: '每页条数' },
+          { enabled: false, key: 'status', value: '草稿', type: 'string', desc: '状态过滤' }
+        ],
+        headers: [],
+        body: '{\n  "supplier_name": "全球科技电子有限公司",\n  "warehouse_code": "WH-SH-01",\n  "planned_date": "2026-07-08",\n  "remark": "自动化测试入库单",\n  "items": [\n    {\n      "product_sku": "ELEC-001",\n      "quantity": 10\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['单号由后端自动生成。', '收货动作使用 receive_items，上架动作使用 putaway_items。', '商品在单仓库总容量上限为 1000 件。'],
+        statusFlow: ['草稿', '待审核', '已审核', '部分收货', '已收货', '部分上架', '已完成']
+      },
+      {
+        id: 'inbound-create',
+        module: '入库',
+        name: '创建入库单',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '创建入库单，单号由后端自动生成。',
+        params: [],
+        headers: [],
+        body: '{\n  "supplier_name": "全球科技电子有限公司",\n  "warehouse_code": "WH-SH-01",\n  "planned_date": "2026-07-08",\n  "remark": "POST 创建入库单",\n  "items": [\n    {\n      "product_sku": "ELEC-001",\n      "quantity": 10\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.order_no', operator: 'exists', expected: '' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['商品在单仓库总容量上限为 1000 件。'],
+        statusFlow: ['草稿']
+      },
+      {
+        id: 'putaway-preview',
+        module: '入库',
+        name: '入库上架预览',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '按商品、仓库和数量预览系统推荐的上架库位分配结果。',
+        params: [
+          { enabled: true, key: 'action', value: 'putaway_preview', type: 'string', desc: '固定值' },
+          { enabled: true, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码' },
+          { enabled: true, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: '商品 SKU' },
+          { enabled: true, key: 'quantity', value: '10', type: 'number', desc: '待上架数量' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data.allocations', operator: 'isArray', expected: '' }],
+        notes: ['单库位容量上限为 100 件。'],
+        statusFlow: []
+      },
+      {
+        id: 'putaway-preview-batch',
+        module: '入库',
+        name: '批量入库上架预览',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '按多条入库明细批量预览推荐上架库位，items 参数为 JSON 字符串。',
+        params: [
+          { enabled: true, key: 'action', value: 'putaway_preview_batch', type: 'string', desc: '固定值' },
+          { enabled: true, key: 'items', value: '[{"warehouse_code":"WH-SH-01","product_sku":"ELEC-001","quantity":10,"location_code":"A-01-01"}]', type: 'string', desc: 'JSON 字符串数组' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data.allocations', operator: 'isArray', expected: '' }],
+        notes: ['用于批量上架前的库位分配预演。'],
+        statusFlow: []
+      },
+      {
+        id: 'inbound-submit',
+        module: '入库',
+        name: '入库单提交审核',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '将入库单从草稿或已驳回提交到待审核。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "submit"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '待审核' }
+        ],
+        notes: ['执行前需要先创建入库单，并把 id 改成实际单据 ID。'],
+        statusFlow: ['草稿', '待审核']
+      },
+      {
+        id: 'inbound-approve',
+        module: '入库',
+        name: '入库单审核通过',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '将待审核入库单审核为已审核。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "approve"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已审核' }
+        ],
+        notes: ['审核通过后可执行收货。'],
+        statusFlow: ['待审核', '已审核']
+      },
+      {
+        id: 'inbound-reject',
+        module: '入库',
+        name: '入库单审核驳回',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '将待审核入库单驳回，并记录驳回原因。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "reject",\n  "reject_reason": "数量与采购计划不一致"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已驳回' }
+        ],
+        notes: ['需传 reject_reason，驳回后可再次提交。'],
+        statusFlow: ['待审核', '已驳回']
+      },
+      {
+        id: 'inbound-cancel',
+        module: '入库',
+        name: '入库单取消',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '取消入库单。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "cancel"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已取消' }
+        ],
+        notes: ['是否允许取消由后端状态流转规则判断。'],
+        statusFlow: ['草稿', '已取消']
+      },
+      {
+        id: 'inbound-receive',
+        module: '入库',
+        name: '入库单收货',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '对已审核入库单执行收货，receive_items 内 id 为入库单明细 ID。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "receive",\n  "receive_items": [\n    {\n      "id": 1,\n      "received_qty": 10,\n      "completion_status": "completed",\n      "reason": ""\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['received_qty 不能超过计划数量，completion_status 可为 completed 或 partial。'],
+        statusFlow: ['已审核', '已收货']
+      },
+      {
+        id: 'inbound-putaway',
+        module: '入库',
+        name: '入库单上架',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/inbound/orders',
+        auth: true,
+        description: '对已收货入库单执行上架，putaway_items 内 id 为入库单明细 ID。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "putaway",\n  "putaway_items": [\n    {\n      "id": 1,\n      "putaway_qty": 10,\n      "location_code": "A-01-01",\n      "completion_status": "completed",\n      "reason": ""\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['putaway_qty 为累计上架数量，不能回退；目标库位不能混放其他 SKU。'],
+        statusFlow: ['已收货', '已完成']
+      },
+      {
+        id: 'outbound-orders',
+        module: '出库',
+        name: '出库单管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '出库单创建、查询、编辑、删除，以及提交、审核、驳回、取消、拣货、发货流程。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '10', type: 'number', desc: '每页条数' },
+          { enabled: false, key: 'status', value: '草稿', type: 'string', desc: '状态过滤' }
+        ],
+        headers: [],
+        body: '{\n  "customer_name": "电商平台B",\n  "warehouse_code": "WH-SH-01",\n  "planned_date": "2026-07-08",\n  "remark": "自动化测试出库单",\n  "items": [\n    {\n      "product_sku": "ELEC-001",\n      "quantity": 1\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['审核通过时锁定库存。', '发货时扣减库存，当前实现会直接将单据置为已完成。'],
+        statusFlow: ['草稿', '待审核', '已审核', '拣货中', '已完成']
+      },
+      {
+        id: 'outbound-create',
+        module: '出库',
+        name: '创建出库单',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '创建出库单，单号由后端自动生成。',
+        params: [],
+        headers: [],
+        body: '{\n  "customer_name": "电商平台B",\n  "warehouse_code": "WH-SH-01",\n  "planned_date": "2026-07-08",\n  "remark": "POST 创建出库单",\n  "items": [\n    {\n      "product_sku": "ELEC-001",\n      "quantity": 1\n    }\n  ]\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.order_no', operator: 'exists', expected: '' },
+          { enabled: true, source: 'body', path: 'data.items', operator: 'isArray', expected: '' }
+        ],
+        notes: ['审核通过后才会锁定库存。'],
+        statusFlow: ['草稿']
+      },
+      {
+        id: 'outbound-submit',
+        module: '出库',
+        name: '出库单提交审核',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '将出库单从草稿或已驳回提交到待审核。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "submit"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '待审核' }
+        ],
+        notes: ['执行前需要先创建出库单，并把 id 改成实际单据 ID。'],
+        statusFlow: ['草稿', '待审核']
+      },
+      {
+        id: 'outbound-approve',
+        module: '出库',
+        name: '出库单审核通过',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '将待审核出库单审核为已审核，并锁定库存。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "approve"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已审核' }
+        ],
+        notes: ['库存不足时后端返回业务错误。'],
+        statusFlow: ['待审核', '已审核']
+      },
+      {
+        id: 'outbound-reject',
+        module: '出库',
+        name: '出库单审核驳回',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '将待审核出库单驳回，并记录驳回原因。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "reject",\n  "reject_reason": "客户信息需要复核"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已驳回' }
+        ],
+        notes: ['需传 reject_reason，驳回后可再次提交。'],
+        statusFlow: ['待审核', '已驳回']
+      },
+      {
+        id: 'outbound-cancel',
+        module: '出库',
+        name: '出库单取消',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '取消出库单，必要时释放已锁定库存。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "action": "cancel"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已取消' }
+        ],
+        notes: ['取消已审核或拣货中的单据会释放锁定库存。'],
+        statusFlow: ['已审核', '已取消']
+      },
+      {
+        id: 'outbound-start-pick',
+        module: '出库',
+        name: '出库单开始拣货',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '将已审核出库单推进到拣货中。后端根据 status 执行业务流转。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "status": "拣货中"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '拣货中' }
+        ],
+        notes: ['当前后端不识别 start_pick 动作名，应通过 status=拣货中 触发。'],
+        statusFlow: ['已审核', '拣货中']
+      },
+      {
+        id: 'outbound-ship',
+        module: '出库',
+        name: '出库单发货',
+        methods: ['PUT', 'PATCH'],
+        method: 'PUT',
+        path: '/api/outbound/orders',
+        auth: true,
+        description: '对已审核或拣货中的出库单执行发货，扣减库存并将单据置为已完成。',
+        params: [],
+        headers: [],
+        body: '{\n  "id": 1,\n  "status": "已发货"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.status', operator: 'equals', expected: '已完成' }
+        ],
+        notes: ['当前后端根据 status=已发货 触发扣减库存，响应中的最终状态为已完成。'],
+        statusFlow: ['拣货中', '已完成']
+      },
+      {
+        id: 'inventory-items',
+        module: '库存',
+        name: '库存查询',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/inventory/items',
+        auth: true,
+        description: '查询库存明细，返回账面库存、锁定库存、可用库存和安全库存。',
+        params: [
+          { enabled: false, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: 'SKU 模糊查询' },
+          { enabled: false, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码模糊查询' },
+          { enabled: false, key: 'location_code', value: 'A-01-01', type: 'string', desc: '库位编码模糊查询' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }
+        ],
+        notes: ['available_qty = quantity - locked_qty。'],
+        statusFlow: []
+      },
+      {
+        id: 'inventory-warning',
+        module: '库存',
+        name: '库存预警',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/inventory/warning',
+        auth: true,
+        description: '按商品和仓库汇总可用库存，低于安全库存时返回预警记录。',
+        params: [
+          { enabled: false, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: 'SKU 模糊查询' },
+          { enabled: false, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码模糊查询' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }],
+        notes: ['预警条件为 available_qty < safety_stock。'],
+        statusFlow: []
+      },
+      {
+        id: 'stocktaking',
+        module: '库存',
+        name: '库存盘点',
+        methods: ['GET', 'POST'],
+        method: 'GET',
+        path: '/api/inventory/stocktaking',
+        auth: true,
+        description: '查询盘点记录或提交盘点结果，盘点会调整库存数量并写入日志。',
+        params: [
+          { enabled: false, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: 'SKU 模糊查询' },
+          { enabled: false, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码模糊查询' }
+        ],
+        headers: [],
+        body: '{\n  "product_sku": "ELEC-001",\n  "warehouse_code": "WH-SH-01",\n  "location_code": "A-01-01",\n  "actual_qty": 98,\n  "reason": "自动化盘点"\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['实盘数量不能小于当前锁定库存。', '单库位容量上限为 100 件。'],
+        statusFlow: []
+      },
+      {
+        id: 'stocktaking-submit',
+        module: '库存',
+        name: '提交库存盘点',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/inventory/stocktaking',
+        auth: true,
+        description: '提交盘点结果，后端按实盘数量调整库存并记录差异。',
+        params: [],
+        headers: [],
+        body: '{\n  "product_sku": "ELEC-001",\n  "warehouse_code": "WH-SH-01",\n  "location_code": "A-01-01",\n  "actual_qty": 98,\n  "reason": "POST 自动化盘点"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.diff', operator: 'exists', expected: '' }
+        ],
+        notes: ['actual_qty 不能小于锁定库存，不能超过单库位容量上限 100。'],
+        statusFlow: []
+      },
+      {
+        id: 'transfer',
+        module: '库存',
+        name: '库存调拨',
+        methods: ['GET', 'POST'],
+        method: 'GET',
+        path: '/api/inventory/transfer',
+        auth: true,
+        description: '查询可调拨库存或提交跨仓/跨库位调拨。',
+        params: [
+          { enabled: false, key: 'product_sku', value: 'ELEC-001', type: 'string', desc: 'SKU 模糊查询' },
+          { enabled: false, key: 'warehouse_code', value: 'WH-SH-01', type: 'string', desc: '仓库编码模糊查询' }
+        ],
+        headers: [],
+        body: '{\n  "product_sku": "ELEC-001",\n  "from_wh": "WH-SH-01",\n  "from_location": "A-01-01",\n  "to_wh": "WH-BJ-01",\n  "to_location": "A-02-01",\n  "quantity": 1\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['调出库位可用库存不足时拒绝调拨。', '目标库位容量上限为 100 件。'],
+        statusFlow: []
+      },
+      {
+        id: 'transfer-submit',
+        module: '库存',
+        name: '提交库存调拨',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/inventory/transfer',
+        auth: true,
+        description: '提交跨仓或跨库位调拨请求。',
+        params: [],
+        headers: [],
+        body: '{\n  "product_sku": "ELEC-001",\n  "from_wh": "WH-SH-01",\n  "from_location": "A-01-01",\n  "to_wh": "WH-BJ-01",\n  "to_location": "A-02-01",\n  "quantity": 1\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['调出库位可用库存不足或目标库位容量不足时会返回业务错误。'],
+        statusFlow: []
+      },
+      {
+        id: 'reports-dashboard',
+        module: '报表',
+        name: '报表看板',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/reports/dashboard',
+        auth: true,
+        description: '返回报表中心 KPI、近 7 天趋势和库存 Top10。',
+        params: [],
+        headers: [],
+        body: '',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.kpi', operator: 'exists', expected: '' }
+        ],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'reports-daily',
+        module: '报表',
+        name: '出入库日报',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/reports/daily',
+        auth: true,
+        description: '返回最近 30 天每日入库和出库商品数量。',
+        params: [],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }],
+        notes: [],
+        statusFlow: []
+      },
+      {
+        id: 'system-users',
+        module: '系统',
+        name: '用户管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/system/users',
+        auth: true,
+        description: '维护 WMS 用户资料表，包括用户名、角色、显示名称和头像。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '20', type: 'number', desc: '每页条数' }
+        ],
+        headers: [],
+        body: '{\n  "username": "worker",\n  "role": "operator",\n  "name": "仓库操作员",\n  "avatar": "https://example.com/avatar.png"\n}',
+        assertions: [{ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' }],
+        notes: ['该接口维护 SystemUser，不负责修改 Django 登录密码。'],
+        statusFlow: []
+      },
+      {
+        id: 'system-user-create',
+        module: '系统',
+        name: '新增用户资料',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/system/users',
+        auth: true,
+        description: '新增 WMS 用户资料记录，不修改 Django 登录密码表。',
+        params: [],
+        headers: [],
+        body: '{\n  "username": "post_worker",\n  "role": "operator",\n  "name": "POST 仓库操作员",\n  "avatar": "https://example.com/avatar.png"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.username', operator: 'equals', expected: 'post_worker' }
+        ],
+        notes: ['这里只维护 SystemUser 资料，不能创建可登录的 Django 用户密码。'],
+        statusFlow: []
+      },
+      {
+        id: 'system-roles',
+        module: '系统',
+        name: '角色管理',
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        method: 'GET',
+        path: '/api/system/roles',
+        auth: true,
+        description: '维护系统角色资料，支持按角色名称查询以及增删改查。',
+        params: [
+          { enabled: true, key: 'page', value: '1', type: 'number', desc: '页码' },
+          { enabled: true, key: 'pageSize', value: '20', type: 'number', desc: '每页条数' },
+          { enabled: false, key: 'keyword', value: 'admin', type: 'string', desc: '按角色名称模糊查询' }
+        ],
+        headers: [],
+        body: '{\n  "name": "测试角色"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }
+        ],
+        notes: ['更新或删除时请求体需要带 id。'],
+        statusFlow: []
+      },
+      {
+        id: 'system-role-create',
+        module: '系统',
+        name: '新增角色',
+        methods: ['POST'],
+        method: 'POST',
+        path: '/api/system/roles',
+        auth: true,
+        description: '新增系统角色。',
+        params: [],
+        headers: [],
+        body: '{\n  "name": "post-test-role"\n}',
+        assertions: [
+          { enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' },
+          { enabled: true, source: 'body', path: 'data.name', operator: 'equals', expected: 'post-test-role' }
+        ],
+        notes: ['角色名称建议保持唯一，避免重复提交。'],
+        statusFlow: []
+      },
+      {
+        id: 'system-logs',
+        module: '系统',
+        name: '操作日志',
+        methods: ['GET'],
+        method: 'GET',
+        path: '/api/system/logs',
+        auth: true,
+        description: '查询业务操作日志，支持操作人、动作和详情模糊过滤。',
+        params: [
+          { enabled: false, key: 'operator', value: 'root', type: 'string', desc: '操作人' },
+          { enabled: false, key: 'action', value: '入库', type: 'string', desc: '操作类型' },
+          { enabled: false, key: 'detail', value: '创建', type: 'string', desc: '日志详情' }
+        ],
+        headers: [],
+        body: '',
+        assertions: [{ enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' }],
+        notes: [],
+        statusFlow: []
+      }
+    ];
+
+    let collection = loadCollection();
+    let selectedId = collection[0].id;
+    let responseText = '';
+    let generatedScript = '';
+    let lastResponseJson = null;
+    let requestHistory = loadHistory();
+
+    const $ = (id) => document.getElementById(id);
+
+    function loadCollection() {
+      try {
+        const raw = localStorage.getItem('wms_api_tester_collection');
+        return raw ? mergeCollection(JSON.parse(raw)) : structuredClone(defaultCollection);
+      } catch {
+        return JSON.parse(JSON.stringify(defaultCollection));
+      }
+    }
+
+    function mergeCollection(storedCollection) {
+      if (!Array.isArray(storedCollection)) return structuredClone(defaultCollection);
+      const seen = new Set(storedCollection.map((item) => item.id));
+      const additions = defaultCollection.filter((item) => !seen.has(item.id));
+      return [...storedCollection, ...structuredClone(additions)];
+    }
+
+    function persistCollection() {
+      localStorage.setItem('wms_api_tester_collection', JSON.stringify(collection));
+    }
+
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem('wms_api_tester_history') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function persistHistory() {
+      localStorage.setItem('wms_api_tester_history', JSON.stringify(requestHistory.slice(0, 8)));
+    }
+
+    function getSelected() {
+      return collection.find((item) => item.id === selectedId) || collection[0];
+    }
+
+    function toast(message) {
+      const box = $('toast');
+      box.textContent = message;
+      box.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => box.classList.remove('show'), 2200);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function methodClass(methods, method) {
+      if (methods.length > 1) return 'method-mixed';
+      return `method-${method.toLowerCase()}`;
+    }
+
+    function updateCollectionSummary(visibleCount = collection.length) {
+      const moduleCount = new Set(collection.map((item) => item.module)).size;
+      const authCount = collection.filter((item) => item.auth).length;
+      $('summaryApiCount').textContent = collection.length;
+      $('summaryModuleCount').textContent = moduleCount;
+      $('summaryAuthCount').textContent = authCount;
+      $('visibleApiCount').textContent = `${visibleCount}/${collection.length}`;
+    }
+
+    function updateRequestPreview() {
+      try {
+        const params = (getSelected().params || []).map((param) => ({ ...param }));
+        document.querySelectorAll('[data-param-index]').forEach((node) => {
+          const index = Number(node.dataset.paramIndex);
+          const field = node.dataset.field;
+          if (!params[index]) return;
+          params[index][field] = node.type === 'checkbox' ? node.checked : node.value;
+        });
+        const item = {
+          ...getSelected(),
+          method: $('methodSelect').value,
+          path: $('pathInput').value.trim() || '/',
+          params
+        };
+        $('requestPreview').textContent = buildUrl(item);
+      } catch {
+        const base = normalizeBaseUrl() || 'http://127.0.0.1:8000';
+        const path = $('pathInput').value.trim() || '/';
+        $('requestPreview').textContent = `${base}${path.startsWith('/') ? path : `/${path}`}`;
+      }
+    }
+
+    function updateEndpointMetadataFromForm() {
+      const method = $('methodSelect').value || getSelected().method;
+      const path = $('pathInput').value.trim() || '/';
+      const item = getSelected();
+      $('endpointSubtitle').textContent = `${item.module} · ${path}`;
+      $('topMethodChip').textContent = method;
+      $('topMethodChip').className = `meta-chip method-chip ${methodClass([method], method)}`;
+      $('topAuthChip').textContent = item.auth ? '需要 Token' : '无需鉴权';
+      $('topAuthChip').className = `meta-chip ${item.auth ? 'auth-needed' : 'auth-open'}`;
+      $('topPathChip').textContent = path;
+      updateRequestPreview();
+    }
+
+    function renderModules() {
+      const query = $('searchInput').value.trim().toLowerCase();
+      const activeMethod = document.querySelector('.method-filter.active')?.dataset.method || 'ALL';
+      const groups = new Map();
+      let visibleCount = 0;
+      collection.forEach((item) => {
+        const itemMethods = item.methods || [item.method];
+        const text = `${item.module} ${item.name} ${item.path} ${item.method} ${itemMethods.join(' ')}`.toLowerCase();
+        if (query && !text.includes(query)) return;
+        if (activeMethod !== 'ALL' && !itemMethods.includes(activeMethod) && item.method !== activeMethod) return;
+        if (!groups.has(item.module)) groups.set(item.module, []);
+        groups.get(item.module).push(item);
+        visibleCount += 1;
+      });
+
+      updateCollectionSummary(visibleCount);
+
+      $('moduleList').innerHTML = visibleCount === 0
+        ? '<div class="sidebar-empty">没有匹配的接口，换个关键词或请求方法</div>'
+        : [...groups.entries()].map(([module, items]) => `
+        <div class="module-block">
+          <div class="module-title">
+            <span>${escapeHtml(module)}</span>
+            <span class="count-badge">${items.length}</span>
+          </div>
+          ${items.map((item) => `
+            <button class="endpoint-link ${item.id === selectedId ? 'active' : ''}" data-id="${escapeHtml(item.id)}" type="button">
+              <span class="method-pill ${methodClass(item.methods, item.method)}">${item.methods.length > 1 ? 'MIXED' : item.method}</span>
+              <span>
+                <strong>${escapeHtml(item.name)}</strong>
+                <span class="path">${escapeHtml(item.path)}</span>
+              </span>
+            </button>
+          `).join('')}
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.endpoint-link').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          saveCurrentFromForm(false);
+          selectedId = btn.dataset.id;
+          renderAll();
+        });
+      });
+    }
+
+    function renderHistory() {
+      $('historyList').innerHTML = requestHistory.length
+        ? requestHistory.map((record, index) => `
+          <button class="history-item" data-history-index="${index}" type="button">
+            <span class="method-pill ${methodClass([record.method], record.method)}">${escapeHtml(record.method)}</span>
+            <strong>${escapeHtml(record.name || record.path)}</strong>
+            <span class="history-meta">${escapeHtml(record.status)} · ${escapeHtml(record.time)}</span>
+          </button>
+        `).join('')
+        : '<div class="empty-state">发送请求后会在这里保留最近 8 条记录</div>';
+    }
+
+    function renderEndpoint() {
+      const item = getSelected();
+      $('endpointTitle').textContent = item.name;
+      $('endpointSubtitle').textContent = `${item.module} · ${item.path}`;
+      $('methodSelect').innerHTML = METHOD_OPTIONS.map((method) =>
+        `<option value="${method}" ${method === item.method ? 'selected' : ''}>${method}</option>`
+      ).join('');
+      $('pathInput').value = item.path;
+      $('bodyInput').value = item.body || '';
+      $('docDescription').textContent = item.description || '';
+      $('paramsCountBadge').textContent = (item.params || []).length;
+      $('headersCountBadge').textContent = (item.headers || []).length;
+      $('notesList').innerHTML = (item.notes || []).map((note) => `<li>${escapeHtml(note)}</li>`).join('') || '<li>暂无特殊业务规则。</li>';
+      $('statusFlow').innerHTML = (item.statusFlow || []).length
+        ? item.statusFlow.map((status) => `<span class="status-chip">${escapeHtml(status)}</span>`).join('')
+        : '<span class="status-chip">无状态流转</span>';
+      renderParams();
+      renderHeaders();
+      renderAssertions();
+      generatePytest(false);
+      updateEndpointMetadataFromForm();
+    }
+
+    function renderParams() {
+      const item = getSelected();
+      $('paramsBody').innerHTML = (item.params || []).length
+        ? (item.params || []).map((param, index) => `
+        <tr>
+          <td><input type="checkbox" data-param-index="${index}" data-field="enabled" ${param.enabled ? 'checked' : ''}></td>
+          <td><input class="input" data-param-index="${index}" data-field="key" value="${escapeHtml(param.key)}"></td>
+          <td><input class="input" data-param-index="${index}" data-field="value" value="${escapeHtml(param.value)}"></td>
+          <td>
+            <select class="select" data-param-index="${index}" data-field="type">
+              ${['string', 'number', 'boolean'].map((type) => `<option value="${type}" ${param.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+            </select>
+          </td>
+          <td><input class="input" data-param-index="${index}" data-field="desc" value="${escapeHtml(param.desc || '')}"></td>
+          <td><button class="btn btn-small btn-danger" data-remove-param="${index}" type="button">删</button></td>
+        </tr>
+      `).join('')
+        : '<tr><td colspan="6"><div class="empty-state">当前接口没有 Query 参数</div></td></tr>';
+      $('paramsCountBadge').textContent = (item.params || []).length;
+    }
+
+    function renderHeaders() {
+      const item = getSelected();
+      const headers = item.headers || [];
+      $('headersBody').innerHTML = headers.length ? headers.map((header, index) => `
+        <tr>
+          <td><input type="checkbox" data-header-index="${index}" data-field="enabled" ${header.enabled ? 'checked' : ''}></td>
+          <td><input class="input" data-header-index="${index}" data-field="key" value="${escapeHtml(header.key)}"></td>
+          <td><input class="input" data-header-index="${index}" data-field="value" value="${escapeHtml(header.value)}"></td>
+          <td><input class="input" data-header-index="${index}" data-field="desc" value="${escapeHtml(header.desc || '')}"></td>
+          <td><button class="btn btn-small btn-danger" data-remove-header="${index}" type="button">删</button></td>
+        </tr>
+      `).join('') : '<tr><td colspan="5"><div class="empty-state">未配置额外 Header，鉴权会自动追加 Authorization</div></td></tr>';
+      $('headersCountBadge').textContent = headers.length;
+    }
+
+    function renderAssertions() {
+      const item = getSelected();
+      const rows = (item.assertions || []).map((assertion, index) => `
+        <div class="assertion-row">
+          <input type="checkbox" data-assert-index="${index}" data-field="enabled" ${assertion.enabled ? 'checked' : ''}>
+          <select class="select" data-assert-index="${index}" data-field="source">
+            ${['body', 'status'].map((source) => `<option value="${source}" ${assertion.source === source ? 'selected' : ''}>${source}</option>`).join('')}
+          </select>
+          <input class="input" data-assert-index="${index}" data-field="path" value="${escapeHtml(assertion.path)}" placeholder="body path，如 data.id">
+          <select class="select" data-assert-index="${index}" data-field="operator">
+            ${['equals', 'notEquals', 'exists', 'contains', 'isArray', 'greaterThan'].map((op) => `<option value="${op}" ${assertion.operator === op ? 'selected' : ''}>${op}</option>`).join('')}
+          </select>
+          <input class="input" data-assert-index="${index}" data-field="expected" value="${escapeHtml(assertion.expected || '')}" placeholder="期望值">
+          <button class="btn btn-small btn-danger" data-remove-assert="${index}" type="button">删</button>
+        </div>
+      `).join('');
+      $('assertionList').innerHTML = rows
+        ? `<div class="assertion-head">
+            <span>启用</span>
+            <span>来源</span>
+            <span>路径</span>
+            <span>条件</span>
+            <span>期望</span>
+            <span></span>
+          </div>${rows}`
+        : '<div class="empty-state">暂无断言，建议至少校验 code 和关键业务字段</div>';
+    }
+
+    function saveCurrentFromForm(showToast = true) {
+      const item = getSelected();
+      item.method = $('methodSelect').value;
+      item.path = $('pathInput').value.trim();
+      item.body = $('bodyInput').value;
+
+      document.querySelectorAll('[data-param-index]').forEach((node) => {
+        const index = Number(node.dataset.paramIndex);
+        const field = node.dataset.field;
+        if (!item.params[index]) return;
+        item.params[index][field] = node.type === 'checkbox' ? node.checked : node.value;
+      });
+
+      document.querySelectorAll('[data-header-index]').forEach((node) => {
+        const index = Number(node.dataset.headerIndex);
+        const field = node.dataset.field;
+        if (!item.headers[index]) return;
+        item.headers[index][field] = node.type === 'checkbox' ? node.checked : node.value;
+      });
+
+      document.querySelectorAll('[data-assert-index]').forEach((node) => {
+        const index = Number(node.dataset.assertIndex);
+        const field = node.dataset.field;
+        if (!item.assertions[index]) return;
+        item.assertions[index][field] = node.type === 'checkbox' ? node.checked : node.value;
+      });
+
+      persistCollection();
+      if (showToast) toast('当前接口配置已保存');
+    }
+
+    function normalizeBaseUrl() {
+      return $('baseUrl').value.trim().replace(/\/$/, '');
+    }
+
+    function buildUrl(item) {
+      const url = new URL(`${normalizeBaseUrl()}${item.path.startsWith('/') ? item.path : `/${item.path}`}`);
+      (item.params || []).filter((param) => param.enabled && param.key).forEach((param) => {
+        url.searchParams.set(param.key, param.value);
+      });
+      return url.toString();
+    }
+
+    function buildHeaders(item) {
+      const headers = {};
+      (item.headers || []).filter((header) => header.enabled && header.key).forEach((header) => {
+        headers[header.key] = header.value;
+      });
+      const token = $('tokenInput').value.trim();
+      if (item.auth && token) headers.Authorization = `Bearer ${token}`;
+      if (!headers['Content-Type'] && !['GET', 'DELETE'].includes(item.method)) {
+        headers['Content-Type'] = 'application/json';
+      }
+      return headers;
+    }
+
+    async function sendRequest() {
+      saveCurrentFromForm(false);
+      const item = getSelected();
+      const url = buildUrl(item);
+      const headers = buildHeaders(item);
+      const options = { method: item.method, headers };
+
+      if (!['GET'].includes(item.method) && item.body.trim()) {
+        options.body = item.body;
+      }
+
+      $('responseOutput').textContent = '请求发送中...';
+      $('statusMetric').className = 'metric';
+      $('statusMetric').textContent = 'Status -';
+      $('timeMetric').textContent = 'Time -';
+      $('sizeMetric').textContent = 'Size -';
+      $('assertMetric').className = 'metric';
+      $('assertMetric').textContent = 'Assertions -';
+      $('assertionResults').innerHTML = '';
+      lastResponseJson = null;
+
+      const start = performance.now();
+      try {
+        const response = await fetch(url, options);
+        const text = await response.text();
+        const duration = Math.round(performance.now() - start);
+        responseText = prettyText(text);
+        $('responseOutput').textContent = responseText;
+        $('statusMetric').textContent = `Status ${response.status}`;
+        $('statusMetric').className = `metric ${response.ok ? 'ok' : 'fail'}`;
+        $('timeMetric').textContent = `Time ${duration}ms`;
+        $('sizeMetric').textContent = `Size ${new Blob([text]).size}B`;
+
+        const json = tryParseJson(text);
+        lastResponseJson = json;
+        if (item.id === 'auth-login' && json?.data?.token) {
+          $('tokenInput').value = json.data.token;
+          localStorage.setItem('wms_api_tester_token', json.data.token);
+        }
+        runAssertions(json, response);
+        recordHistory(item, response.status, duration);
+      } catch (error) {
+        responseText = String(error.stack || error.message || error);
+        $('responseOutput').textContent = responseText;
+        $('statusMetric').textContent = 'Status ERR';
+        $('statusMetric').className = 'metric fail';
+        $('timeMetric').textContent = `Time ${Math.round(performance.now() - start)}ms`;
+        $('assertMetric').textContent = 'Assertions -';
+        $('assertMetric').className = 'metric fail';
+        recordHistory(item, 'ERR', Math.round(performance.now() - start));
+      }
+    }
+
+    function prettyText(text) {
+      const json = tryParseJson(text);
+      return json ? JSON.stringify(json, null, 2) : text;
+    }
+
+    function tryParseJson(text) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
+    }
+
+    function getByPath(object, path) {
+      if (!path) return object;
+      return path.split('.').reduce((acc, key) => {
+        if (acc == null) return undefined;
+        if (key.endsWith(']')) {
+          const match = key.match(/^(.+)\[(\d+)\]$/);
+          if (match) return acc[match[1]]?.[Number(match[2])];
+        }
+        return acc[key];
+      }, object);
+    }
+
+    function coerceExpected(value) {
+      if (value === 'true') return true;
+      if (value === 'false') return false;
+      if (value === 'null') return null;
+      if (value !== '' && !Number.isNaN(Number(value))) return Number(value);
+      return value;
+    }
+
+    function runAssertions(json, response) {
+      const item = getSelected();
+      const assertions = (item.assertions || []).filter((assertion) => assertion.enabled);
+      let pass = 0;
+      let fail = 0;
+      const results = assertions.map((assertion) => {
+        const source = assertion.source === 'status' ? response.status : json;
+        const actual = assertion.source === 'status' ? response.status : getByPath(source, assertion.path);
+        const expected = coerceExpected(assertion.expected);
+        let ok = false;
+        if (assertion.operator === 'equals') ok = actual === expected;
+        if (assertion.operator === 'notEquals') ok = actual !== expected;
+        if (assertion.operator === 'exists') ok = actual !== undefined && actual !== null;
+        if (assertion.operator === 'contains') ok = String(actual ?? '').includes(String(assertion.expected));
+        if (assertion.operator === 'isArray') ok = Array.isArray(actual);
+        if (assertion.operator === 'greaterThan') ok = Number(actual) > Number(expected);
+        ok ? pass++ : fail++;
+        return {
+          ok,
+          label: `${assertion.source}.${assertion.path || 'status'} ${assertion.operator} ${assertion.expected || ''}`.trim(),
+          actual
+        };
+      });
+      $('assertMetric').textContent = `Assertions ${pass}/${assertions.length}`;
+      $('assertMetric').className = `metric ${fail === 0 ? 'ok' : 'fail'}`;
+      $('assertionResults').innerHTML = results.map((result) => `
+        <div class="assertion-result ${result.ok ? 'ok' : 'fail'}">
+          <span>${result.ok ? 'PASS' : 'FAIL'}</span>
+          <strong title="${escapeHtml(JSON.stringify(result.actual))}">${escapeHtml(result.label)}</strong>
+        </div>
+      `).join('');
+    }
+
+    function recordHistory(item, status, duration) {
+      requestHistory = [
+        {
+          id: item.id,
+          name: item.name,
+          method: item.method,
+          path: item.path,
+          status: String(status),
+          time: `${duration}ms`,
+          at: Date.now()
+        },
+        ...requestHistory.filter((record) => !(record.id === item.id && record.method === item.method && record.path === item.path))
+      ].slice(0, 8);
+      persistHistory();
+      renderHistory();
+    }
+
+    function cloneEndpoint() {
+      saveCurrentFromForm(false);
+      const source = getSelected();
+      const clone = JSON.parse(JSON.stringify(source));
+      clone.id = `${source.id}-case-${Date.now()}`;
+      clone.name = `${source.name} 用例`;
+      collection.splice(collection.findIndex((item) => item.id === source.id) + 1, 0, clone);
+      selectedId = clone.id;
+      persistCollection();
+      renderAll();
+      toast('已复制为新测试用例');
+    }
+
+    function formatBody() {
+      const raw = $('bodyInput').value.trim();
+      if (!raw) return;
+      try {
+        $('bodyInput').value = JSON.stringify(JSON.parse(raw), null, 2);
+        saveCurrentFromForm(false);
+        generatePytest(false);
+        toast('JSON 已格式化');
+      } catch {
+        toast('Body 不是合法 JSON');
+      }
+    }
+
+    function addAssertionsFromResponse() {
+      if (!lastResponseJson) {
+        toast('请先发送请求并获得 JSON 响应');
+        return;
+      }
+      const item = getSelected();
+      const suggestions = [];
+      if (lastResponseJson.code !== undefined) {
+        suggestions.push({ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: String(lastResponseJson.code) });
+      }
+      if (lastResponseJson.data !== undefined) {
+        suggestions.push({ enabled: true, source: 'body', path: 'data', operator: 'exists', expected: '' });
+      }
+      if (Array.isArray(lastResponseJson.data?.list)) {
+        suggestions.push({ enabled: true, source: 'body', path: 'data.list', operator: 'isArray', expected: '' });
+      }
+      const existing = new Set((item.assertions || []).map((assertion) => `${assertion.source}:${assertion.path}:${assertion.operator}`));
+      const additions = suggestions.filter((assertion) => !existing.has(`${assertion.source}:${assertion.path}:${assertion.operator}`));
+      item.assertions.push(...additions);
+      persistCollection();
+      renderAssertions();
+      generatePytest(false);
+      toast(additions.length ? `已生成 ${additions.length} 条断言` : '没有新的可生成断言');
+    }
+
+    function buildCurl(item = getSelected()) {
+      const url = buildUrl(item);
+      const headers = buildHeaders(item);
+      const parts = [`curl -X ${item.method} "${url}"`];
+      Object.entries(headers).forEach(([key, value]) => {
+        parts.push(`  -H "${key}: ${value}"`);
+      });
+      if (!['GET'].includes(item.method) && item.body.trim()) {
+        parts.push(`  -d '${item.body.replaceAll("'", "\\'")}'`);
+      }
+      return parts.join(' \\\n');
+    }
+
+    function generatePytest(showToast = true) {
+      saveCurrentFromForm(false);
+      const item = getSelected();
+      const params = {};
+      (item.params || []).filter((param) => param.enabled && param.key).forEach((param) => {
+        params[param.key] = param.value;
+      });
+      const body = item.body.trim() ? item.body : '{}';
+      const assertions = (item.assertions || []).filter((assertion) => assertion.enabled);
+      const script = `import requests
+
+BASE_URL = "${normalizeBaseUrl()}"
+TOKEN = "<token>"
+
+
+def get_by_path(data, path):
+    value = data
+    for key in path.split("."):
+        if not key:
+            continue
+        value = value[key]
+    return value
+
+
+def test_${item.id.replace(/[^a-zA-Z0-9_]/g, '_')}():
+    headers = ${JSON.stringify(buildHeaders({ ...item, auth: false }), null, 4)}
+    ${item.auth ? 'headers["Authorization"] = f"Bearer {TOKEN}"' : '# no auth required'}
+    response = requests.request(
+        "${item.method}",
+        f"{BASE_URL}${item.path}",
+        params=${JSON.stringify(params, null, 8)},
+        ${['GET'].includes(item.method) ? '' : `json=${body},`}
+        headers=headers,
+        timeout=10,
+    )
+    assert response.status_code == 200
+    data = response.json()
+${assertions.map((assertion) => assertionToPytest(assertion)).join('\n') || '    assert data is not None'}
+`;
+      generatedScript = script;
+      $('scriptOutput').textContent = script;
+      if (showToast) toast('已生成 pytest 脚本');
+    }
+
+    function assertionToPytest(assertion) {
+      if (assertion.source === 'status') {
+        return `    assert response.status_code == ${Number(assertion.expected) || 200}`;
+      }
+      const access = assertion.path ? `get_by_path(data, "${assertion.path}")` : 'data';
+      const expected = JSON.stringify(coerceExpected(assertion.expected));
+      if (assertion.operator === 'equals') return `    assert ${access} == ${expected}`;
+      if (assertion.operator === 'notEquals') return `    assert ${access} != ${expected}`;
+      if (assertion.operator === 'exists') return `    assert ${access} is not None`;
+      if (assertion.operator === 'contains') return `    assert ${JSON.stringify(assertion.expected)} in str(${access})`;
+      if (assertion.operator === 'isArray') return `    assert isinstance(${access}, list)`;
+      if (assertion.operator === 'greaterThan') return `    assert float(${access}) > ${Number(assertion.expected) || 0}`;
+      return `    assert ${access} is not None`;
+    }
+
+    async function copyText(text, message = '已复制') {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast(message);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast(message);
+      }
+    }
+
+    function exportCollection() {
+      saveCurrentFromForm(false);
+      const payload = {
+        name: 'WMS API 测试集合',
+        exportedAt: new Date().toISOString(),
+        baseUrl: $('baseUrl').value,
+        collection
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wms-api-test-collection.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCollection(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          if (!Array.isArray(payload.collection)) throw new Error('集合格式不正确');
+          collection = payload.collection;
+          if (payload.baseUrl) $('baseUrl').value = payload.baseUrl;
+          selectedId = collection[0]?.id;
+          persistCollection();
+          renderAll();
+          toast('集合已导入');
+        } catch (error) {
+          toast(`导入失败：${error.message}`);
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function loginQuick() {
+      selectedId = 'auth-login';
+      renderAll();
+      sendRequest();
+    }
+
+    function bindEvents() {
+      $('searchInput').addEventListener('input', renderModules);
+      $('clearSearchBtn').addEventListener('click', () => {
+        $('searchInput').value = '';
+        document.querySelectorAll('.method-filter').forEach((node) => node.classList.remove('active'));
+        document.querySelector('[data-method="ALL"]').classList.add('active');
+        renderModules();
+        $('searchInput').focus();
+      });
+      $('methodFilters').addEventListener('click', (event) => {
+        const btn = event.target.closest('.method-filter');
+        if (!btn) return;
+        document.querySelectorAll('.method-filter').forEach((node) => node.classList.remove('active'));
+        btn.classList.add('active');
+        renderModules();
+      });
+      $('sendBtn').addEventListener('click', sendRequest);
+      $('sendBtnInline').addEventListener('click', sendRequest);
+      $('saveEndpointBtn').addEventListener('click', () => {
+        saveCurrentFromForm(true);
+        renderModules();
+        updateEndpointMetadataFromForm();
+        generatePytest(false);
+      });
+      $('cloneEndpointBtn').addEventListener('click', cloneEndpoint);
+      $('copyCurlBtn').addEventListener('click', () => {
+        saveCurrentFromForm(false);
+        copyText(buildCurl(), 'cURL 已复制');
+      });
+      $('copyResponseBtn').addEventListener('click', () => copyText(responseText || '', '响应已复制'));
+      $('addResponseAssertBtn').addEventListener('click', addAssertionsFromResponse);
+      $('generatePytestBtn').addEventListener('click', () => generatePytest(true));
+      $('copyScriptBtn').addEventListener('click', () => copyText(generatedScript || $('scriptOutput').textContent, '脚本已复制'));
+      $('exportBtn').addEventListener('click', exportCollection);
+      $('importBtn').addEventListener('click', () => $('importFile').click());
+      $('importFile').addEventListener('change', (event) => {
+        if (event.target.files[0]) importCollection(event.target.files[0]);
+      });
+      $('loginBtn').addEventListener('click', loginQuick);
+      $('clearTokenBtn').addEventListener('click', () => {
+        $('tokenInput').value = '';
+        localStorage.removeItem('wms_api_tester_token');
+        toast('Token 已清空');
+      });
+      $('resetBaseUrlBtn').addEventListener('click', () => {
+        $('baseUrl').value = 'http://127.0.0.1:8000';
+        localStorage.setItem('wms_api_tester_base_url', $('baseUrl').value);
+        updateRequestPreview();
+      });
+      $('tokenInput').addEventListener('input', () => localStorage.setItem('wms_api_tester_token', $('tokenInput').value));
+      $('baseUrl').addEventListener('input', () => {
+        localStorage.setItem('wms_api_tester_base_url', $('baseUrl').value);
+        updateRequestPreview();
+      });
+      $('methodSelect').addEventListener('change', updateEndpointMetadataFromForm);
+      $('pathInput').addEventListener('input', updateEndpointMetadataFromForm);
+      $('paramsBody').addEventListener('input', updateRequestPreview);
+      $('paramsBody').addEventListener('change', updateRequestPreview);
+      $('formatBodyBtn').addEventListener('click', formatBody);
+      $('copyBodyBtn').addEventListener('click', () => copyText($('bodyInput').value, 'Body 已复制'));
+      $('clearBodyBtn').addEventListener('click', () => {
+        $('bodyInput').value = '';
+        saveCurrentFromForm(false);
+        generatePytest(false);
+      });
+
+      document.querySelector('[data-tab-group="request"]').addEventListener('click', (event) => {
+        const tab = event.target.closest('.tab');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach((node) => node.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach((node) => node.classList.remove('active'));
+        tab.classList.add('active');
+        $(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+
+      $('addParamBtn').addEventListener('click', () => {
+        getSelected().params.push({ enabled: true, key: '', value: '', type: 'string', desc: '' });
+        renderParams();
+        updateRequestPreview();
+      });
+      $('addHeaderBtn').addEventListener('click', () => {
+        getSelected().headers.push({ enabled: true, key: '', value: '', desc: '' });
+        renderHeaders();
+        generatePytest(false);
+      });
+      $('addAssertionBtn').addEventListener('click', () => {
+        getSelected().assertions.push({ enabled: true, source: 'body', path: 'code', operator: 'equals', expected: '200' });
+        renderAssertions();
+        generatePytest(false);
+      });
+      $('paramsBody').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-remove-param]');
+        if (!btn) return;
+        getSelected().params.splice(Number(btn.dataset.removeParam), 1);
+        renderParams();
+        updateRequestPreview();
+      });
+      $('headersBody').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-remove-header]');
+        if (!btn) return;
+        getSelected().headers.splice(Number(btn.dataset.removeHeader), 1);
+        renderHeaders();
+        generatePytest(false);
+      });
+      $('assertionList').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-remove-assert]');
+        if (!btn) return;
+        getSelected().assertions.splice(Number(btn.dataset.removeAssert), 1);
+        renderAssertions();
+        generatePytest(false);
+      });
+      $('clearHistoryBtn').addEventListener('click', () => {
+        requestHistory = [];
+        persistHistory();
+        renderHistory();
+      });
+      $('historyList').addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-history-index]');
+        if (!btn) return;
+        const record = requestHistory[Number(btn.dataset.historyIndex)];
+        if (!record) return;
+        if (!collection.some((item) => item.id === record.id)) {
+          toast('该历史接口已不存在');
+          return;
+        }
+        selectedId = record.id;
+        renderAll();
+      });
+    }
+
+    function renderAll() {
+      renderModules();
+      renderEndpoint();
+      renderHistory();
+    }
+
+    function init() {
+      const storedToken = localStorage.getItem('wms_api_tester_token');
+      const storedBaseUrl = localStorage.getItem('wms_api_tester_base_url');
+      if (storedToken) $('tokenInput').value = storedToken;
+      if (storedBaseUrl) $('baseUrl').value = storedBaseUrl;
+      bindEvents();
+      renderAll();
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.env/
+*.egg-info/
+.coverage
+.pytest_cache/
+
+# Django/local data
+backend/db.sqlite3
+backend/*.log
+backend/*.out
+backend/load_test_result.txt
+backend/test_log.txt
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/*.log
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+~$*
+
+# Local tooling artifacts
+*.local
+playwright-report/
+test-results/

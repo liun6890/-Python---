@@ -1,0 +1,6 @@
+django==4.1.13
+django-cors-headers==4.3.1
+pymysql==1.1.1
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+drf-yasg==1.21.15
